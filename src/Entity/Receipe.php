@@ -41,6 +41,10 @@ class Receipe
     #[ORM\Column(type: Types::ARRAY, nullable: true)]
     private ?array $keyword = null;
 
+    #[ORM\ManyToOne(inversedBy: 'receipes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $author = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -150,6 +154,18 @@ class Receipe
     public function setKeyword(?array $keyword): static
     {
         $this->keyword = $keyword;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): static
+    {
+        $this->author = $author;
 
         return $this;
     }
