@@ -28,6 +28,10 @@ class DailyMeal
     #[ORM\ManyToOne(inversedBy: 'dailyMeals')]
     private ?User $author = null;
 
+    #[ORM\ManyToOne(inversedBy: 'dailyMeals')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?MealPlan $mealPlan = null;
+
     public function __construct()
     {
         $this->receipes = new ArrayCollection();
@@ -82,6 +86,18 @@ class DailyMeal
     public function setAuthor(?User $author): static
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    public function getMealPlan(): ?MealPlan
+    {
+        return $this->mealPlan;
+    }
+
+    public function setMealPlan(?MealPlan $mealPlan): static
+    {
+        $this->mealPlan = $mealPlan;
 
         return $this;
     }
