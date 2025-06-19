@@ -4,49 +4,60 @@ namespace App\DataFixtures;
 
 use App\Entity\User;
 use App\Entity\Receipe;
+use App\Entity\DailyMeal;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
-    private UserPasswordHasherInterface $passwordHasher;
-
-    public function __construct(UserPasswordHasherInterface $passwordHasher)
-    {
-        $this->passwordHasher = $passwordHasher;
-    }
-
     public function load(ObjectManager $manager): void
     {
-        // Création d'un utilisateur
+        // Création utilisateur
         $user = new User();
-        $user->setEmail('test@example.com');
-        $user->setName('Doe');
-        $user->setFirstName('John');
-        $user->setAdress('123 Main St');
-
-        // Hasher le mot de passe (exemple : "password")
-        $hashedPassword = $this->passwordHasher->hashPassword($user, 'password');
-        $user->setPassword($hashedPassword);
-
+        $user->setEmail('user@example.com');
+        $user->setName('Dupont');
+        $user->setFirstName('Jean');
         $user->setRoles(['ROLE_USER']);
+        $user->setPassword('password'); // Attention : en vrai, il faut hasher le mdp !
         $manager->persist($user);
 
-        // Création d'une recette liée à cet utilisateur
-        $receipe = new Receipe();
-        $receipe->setName('Tarte aux pommes');
-        $receipe->setDescription('Délicieuse tarte aux pommes maison');
-        $receipe->setPreparationTime(30.0);
-        $receipe->setCookingTime('45');
-        $receipe->setDifficulty('Moyen');
-        $receipe->setCategory(['Dessert', 'Pâtisserie']);
-        $receipe->setImage('tarte.jpg');
-        $receipe->setCoast(10);
-        $receipe->setKeyword(['pommes', 'sucré', 'four']);
-        $receipe->setAuthor($user);
+        // Création recette 1
+        $receipe1 = new Receipe();
+        $receipe1->setName('Poulet Rôti');
+        $receipe1->setDescription('Délicieux poulet rôti au four.');
+        $receipe1->setImage('poulet.jpg');
+        $receipe1->setAuthor($user);
+        $manager->persist($receipe1);
 
-        $manager->persist($receipe);
+        // Création recette 2
+        $receipe2 = new Receipe();
+        $receipe2->setName('Salade Verte');
+        $receipe2->setDescription('Salade fraîche avec vinaigrette maison.');
+        $receipe2->setImage('salade.jpg');
+        $receipe2->setAuthor($user);
+        $manager->persist($receipe2);
+
+        // Création repas matin
+        $morningMeal = new DailyMeal();
+        $morningMeal->setMealDate(new \DateTime('today'));
+        $morningMeal->addReceipe($receipe1);
+        $morningMeal->setAuthor($user);
+        $manager->persist($morningMeal);
+
+        // Création repas midi
+        $noonMeal = new DailyMeal();
+        $noonMeal->setMealDate(new \DateTime('today'));
+        $noonMeal->addReceipe($receipe1);
+        $noonMeal->addReceipe($receipe2);
+        $noonMeal->setAuthor($user);
+        $manager->persist($noonMeal);
+
+        // Création repas soir
+        $eveningMeal = new DailyMeal();
+        $eveningMeal->setMealDate(new \DateTime('today'));
+        $eveningMeal->addReceipe($receipe2);
+        $eveningMeal->setAuthor($user);
+        $manager->persist($eveningMeal);
 
         $manager->flush();
     }

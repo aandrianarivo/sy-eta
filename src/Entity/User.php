@@ -49,9 +49,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Receipe::class, mappedBy: 'author', orphanRemoval: true)]
     private Collection $receipes;
 
+    /**
+     * @var Collection<int, DailyMeal>
+     */
+    #[ORM\OneToMany(targetEntity: DailyMeal::class, mappedBy: 'author')]
+    private Collection $dailyMeals;
+
     public function __construct()
     {
         $this->receipes = new ArrayCollection();
+        $this->dailyMeals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -187,6 +194,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($receipe->getAuthor() === $this) {
                 $receipe->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DailyMeal>
+     */
+    public function getDailyMeals(): Collection
+    {
+        return $this->dailyMeals;
+    }
+
+    public function addDailyMeal(DailyMeal $dailyMeal): static
+    {
+        if (!$this->dailyMeals->contains($dailyMeal)) {
+            $this->dailyMeals->add($dailyMeal);
+            $dailyMeal->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDailyMeal(DailyMeal $dailyMeal): static
+    {
+        if ($this->dailyMeals->removeElement($dailyMeal)) {
+            // set the owning side to null (unless already changed)
+            if ($dailyMeal->getAuthor() === $this) {
+                $dailyMeal->setAuthor(null);
             }
         }
 

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ReceipeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -44,6 +46,17 @@ class Receipe
     #[ORM\ManyToOne(inversedBy: 'receipes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
+
+    /**
+     * @var Collection<int, DailyMeal>
+     */
+    #[ORM\ManyToMany(targetEntity: DailyMeal::class, mappedBy: 'receipes')]
+    private Collection $dailyMeals;
+
+    public function __construct()
+    {
+        $this->dailyMeals = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -166,6 +179,33 @@ class Receipe
     public function setAuthor(?User $author): static
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DailyMeal>
+     */
+    public function getDailyMeals(): Collection
+    {
+        return $this->dailyMeals;
+    }
+
+    public function addDailyMeal(DailyMeal $dailyMeal): static
+    {
+        if (!$this->dailyMeals->contains($dailyMeal)) {
+            $this->dailyMeals->add($dailyMeal);
+            $dailyMeal->addReceipe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDailyMeal(DailyMeal $dailyMeal): static
+    {
+        if ($this->dailyMeals->removeElement($dailyMeal)) {
+            $dailyMeal->removeReceipe($this);
+        }
 
         return $this;
     }
